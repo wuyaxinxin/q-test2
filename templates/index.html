@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}全球贸易走势展示{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="text-center mb-4">全球贸易走势展示</h2>
+        <p class="text-center text-muted">2015-2024年主要国家进出口总额趋势分析</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">进出口总额趋势图</h5>
+                <div id="main-chart" style="width: 100%; height: 600px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">数据年份</h5>
+                <p class="card-text display-6">2015-2024</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">覆盖国家</h5>
+                <p class="card-text display-6">5个</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">数据维度</h5>
+                <p class="card-text display-6">进口+出口</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+{% endblock %}
