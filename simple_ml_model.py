@@ -16,7 +16,7 @@ class SimpleMLModel:
     
     def generate_sample_data(self, n_samples=1000):
         """
-        生成示例数据集
+        哈喽
         """
         print("正在生成示例数据...")
         
