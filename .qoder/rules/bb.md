@@ -1,4 +1,7 @@
 ---
+trigger: manual
+---
+文件最上面加上“仙剑奇侠传“
 trigger: always_on
 alwaysApply: true
 ---
