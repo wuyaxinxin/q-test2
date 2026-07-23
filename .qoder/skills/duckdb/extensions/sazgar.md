@@ -1,0 +1,230 @@
+# Sazgar Extension
+
+System monitoring & SQL query routing for DuckDB - 25+ table functions for CPU, memory, disk, network, processes,
+Docker, GPU. Execute queries on remote databases via PostgreSQL wire protocol with SQLGlot dialect translation (
+PostgreSQL, MySQL, ClickHouse, Snowflake, BigQuery).
+       
+## Installing and Loading
+
+```sql
+INSTALL sazgar FROM community;
+LOAD sazgar;
+```
+
+## Example
+
+```sql
+-- ════════════════════════════════════════════════════════════════════
+-- 1. SYSTEM OVERVIEW
+-- ════════════════════════════════════════════════════════════════════
+
+-- Get complete system information
+SELECT * FROM sazgar_system();
+-- Returns: os_name, os_version, hostname, kernel_version, architecture
+
+-- System uptime
+SELECT * FROM sazgar_uptime();
+-- Returns: uptime_seconds, uptime_formatted, boot_time
+
+-- ════════════════════════════════════════════════════════════════════
+-- 2. MEMORY MONITORING
+-- ════════════════════════════════════════════════════════════════════
+
+-- Memory in gigabytes (supports: bytes, KB, KiB, MB, MiB, GB, GiB, TB, TiB)
+SELECT * FROM sazgar_memory(unit := 'GB');
+-- Returns: total_memory, used_memory, available_memory, usage_percent
+
+-- Check if system is under memory pressure
+SELECT 
+    CASE WHEN usage_percent > 90 THEN 'CRITICAL'
+         WHEN usage_percent > 70 THEN 'WARNING'
+         ELSE 'OK' END as status,
+    available_memory || ' GB available' as available
+FROM sazgar_memory(unit := 'GB');
+
+-- ════════════════════════════════════════════════════════════════════
+-- 3. CPU MONITORING
+-- ════════════════════════════════════════════════════════════════════
+
+-- CPU information per core
+SELECT * FROM sazgar_cpu();
+-- Returns: core_id, frequency_mhz, usage_percent, vendor, brand
+
+-- Average CPU usage across all cores
+SELECT 
+    COUNT(*) as num_cores,
+    ROUND(AVG(usage_percent), 2) as avg_usage,
+    MAX(usage_percent) as max_core_usage
+FROM sazgar_cpu();
+
+-- System load averages (1, 5, 15 minutes)
+SELECT * FROM sazgar_load();
+-- Returns: load_1min, load_5min, load_15min
+
+-- ════════════════════════════════════════════════════════════════════
+-- 4. DISK MONITORING
+-- ════════════════════════════════════════════════════════════════════
+
+-- Disk space with unit conversion
+SELECT * FROM sazgar_disks(unit := 'GB');
+-- Returns: name, mount_point, file_system, total_space, used_space, available_space, usage_percent
+
+-- Find disks running low on space
+SELECT name, mount_point, 
+       ROUND(usage_percent, 1) || '%' as used,
+       available_space || ' GB free' as free_space
+FROM sazgar_disks(unit := 'GB')
+WHERE usage_percent > 80
+ORDER BY usage_percent DESC;
+
+-- ════════════════════════════════════════════════════════════════════
+-- 5. NETWORK MONITORING
+-- ════════════════════════════════════════════════════════════════════
+
+-- Network interface statistics
+SELECT * FROM sazgar_network();
+-- Returns: interface, mac_address, rx_bytes, tx_bytes, rx_packets, tx_packets, rx_errors, tx_errors
+
+-- Network traffic in MB
+SELECT 
+    interface,
+    ROUND(rx_bytes / 1048576.0, 2) as rx_mb,
+    ROUND(tx_bytes / 1048576.0, 2) as tx_mb
+FROM sazgar_network()
+WHERE rx_bytes > 0
+ORDER BY rx_bytes DESC;
+
+-- ════════════════════════════════════════════════════════════════════
+-- 6. PROCESS MONITORING
+-- ════════════════════════════════════════════════════════════════════
+
+-- All running processes
+SELECT * FROM sazgar_processes();
+-- Returns: pid, name, cpu_usage, memory_usage, status, user, command
+
+-- Top 10 memory-hungry processes
+SELECT pid, name, 
+       ROUND(memory_usage, 2) || ' MB' as memory,
+       ROUND(cpu_usage, 2) || '%' as cpu
+FROM sazgar_processes()
+ORDER BY memory_usage DESC
+LIMIT 10;
+
+-- Find specific process
+SELECT * FROM sazgar_processes()
+WHERE name LIKE '%postgres%' OR name LIKE '%duckdb%';
+
+-- ════════════════════════════════════════════════════════════════════
+-- 7. NETWORK PORTS (Linux/macOS)
+-- ════════════════════════════════════════════════════════════════════
+
+-- All open ports
+SELECT * FROM sazgar_ports();
+-- Returns: protocol, local_addr, local_port, remote_addr, remote_port, state, pid, process_name
+
+-- Find what's listening on common ports
+SELECT protocol, local_port, process_name, state
+FROM sazgar_ports()
+WHERE local_port IN (80, 443, 5432, 3306, 8080, 22)
+ORDER BY local_port;
+
+-- Filter by port range
+SELECT * FROM sazgar_ports(filter := '8000-9000');
+
+-- ════════════════════════════════════════════════════════════════════
+-- 8. DOCKER MONITORING
+-- ════════════════════════════════════════════════════════════════════
+
+-- Docker container status
+SELECT * FROM sazgar_docker();
+-- Returns: container_id, name, image, status, state, ports, created, command
+
+-- Running containers only
+SELECT name, image, status, ports
+FROM sazgar_docker()
+WHERE state = 'running';
+
+-- ════════════════════════════════════════════════════════════════════
+-- 9. SYSTEM SERVICES
+-- ════════════════════════════════════════════════════════════════════
+
+-- List system services (systemd on Linux, launchctl on macOS)
+SELECT * FROM sazgar_services();
+-- Returns: name, status, pid, description
+
+-- Find database services
+SELECT name, status, pid
+FROM sazgar_services()
+WHERE name LIKE '%postgres%' OR name LIKE '%mysql%' OR name LIKE '%mongo%';
+
+-- ════════════════════════════════════════════════════════════════════
+-- 10. ADDITIONAL MONITORING FUNCTIONS
+-- ════════════════════════════════════════════════════════════════════
+
+-- Logged-in users
+SELECT * FROM sazgar_users();
+-- Returns: username, terminal, host, login_time
+
+-- Environment variables
+SELECT * FROM sazgar_environment();
+-- Returns: name, value
+
+-- Hardware temperatures (where available)
+SELECT * FROM sazgar_components();
+-- Returns: label, temperature, max_temp, critical_temp
+
+-- NVIDIA GPU monitoring (requires nvidia feature)
+SELECT * FROM sazgar_gpu();
+-- Returns: gpu_id, name, memory_total, memory_used, temperature, utilization
+
+-- ════════════════════════════════════════════════════════════════════
+-- 11. SQL QUERY ROUTING (v1.0.0 Feature)
+-- ════════════════════════════════════════════════════════════════════
+
+-- Step 1: Register a PostgreSQL-compatible database target
+SELECT * FROM sazgar_target(
+    'analytics',                    -- target name
+    'host=db.example.com port=5432 user=analyst password=*** dbname=warehouse sslmode=require'
+);
+-- Returns: name, dialect, provider, status
+
+-- Step 2: Execute query on remote database, get results in DuckDB!
+SELECT * FROM sazgar_route(
+    '',                             -- local_query (ignored when remote_query provided)
+    'analytics',                    -- target name
+    'TRUE',                         -- condition (always route)
+    'SELECT customer_id, order_date, amount FROM orders LIMIT 1000'
+);
+-- Returns: Dynamic columns matching your query!
+
+-- Conditional routing based on system resources
+SELECT * FROM sazgar_route(
+    'SELECT * FROM local_cache',    -- Use this if condition is FALSE
+    'analytics',
+    '(SELECT usage_percent FROM sazgar_memory()) > 80',  -- Route if memory > 80%
+    'SELECT * FROM remote_data'
+);
+
+-- Join local DuckDB data with remote query results
+WITH remote_orders AS (
+    SELECT * FROM sazgar_route('', 'analytics', 'TRUE', 
+        'SELECT customer_id, SUM(amount) as total FROM orders GROUP BY customer_id')
+)
+SELECT c.*, r.total
+FROM local_customers c
+JOIN remote_orders r ON c.id = r.customer_id;
+
+-- ════════════════════════════════════════════════════════════════════
+-- 12. DEVOPS DASHBOARD EXAMPLE
+-- ════════════════════════════════════════════════════════════════════
+
+-- Create a comprehensive system health view
+SELECT 
+    (SELECT hostname FROM sazgar_system()) as host,
+    (SELECT ROUND(usage_percent, 1) FROM sazgar_memory(unit := 'GB')) as mem_pct,
+    (SELECT ROUND(AVG(usage_percent), 1) FROM sazgar_cpu()) as cpu_pct,
+    (SELECT load_1min FROM sazgar_load()) as load_1m,
+    (SELECT COUNT(*) FROM sazgar_processes()) as processes,
+    (SELECT COUNT(*) FROM sazgar_docker() WHERE state = 'running') as containers;
+```
+

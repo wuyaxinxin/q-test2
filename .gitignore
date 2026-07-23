@@ -1,0 +1,60 @@
+# Java 编译文件
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Maven 构建目录
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# IDE 配置文件
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# macOS 系统文件
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Node.js (针对 countdown-app)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+.cache/
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# 日志文件
+logs/
+*.log
+
+# 操作系统生成的文件
+Thumbs.db
+ehthumbs.db
+Desktop.ini

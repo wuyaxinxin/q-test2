@@ -1,0 +1,10 @@
+{
+  "model_id": "mdl_c6c35b79",
+  "deployment_environment": "production",
+  "deployment_time": 1769739968.983469,
+  "security_scan_passed": true,
+  "traffic_allocation": 0.1,
+  "success": true,
+  "deployment_package_hash": "7711a1336316717d",
+  "api_endpoint": "https://api.example.com/models/mdl_c6c35b79"
+}

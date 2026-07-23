@@ -1,0 +1,35 @@
+{
+  "model_id": "mdl_c6c35b79",
+  "model_version": "1.0.0",
+  "creation_timestamp": 1769739966.0219488,
+  "last_update_timestamp": 1769739968.975422,
+  "is_trained": true,
+  "n_features": 3,
+  "weights": [
+    2.921432,
+    2.005507,
+    -1.008104
+  ],
+  "bias": 0.098764,
+  "feature_means": [
+    -0.006316,
+    0.031516,
+    -0.056571
+  ],
+  "feature_stds": [
+    0.980046,
+    1.006893,
+    1.008258
+  ],
+  "performance_metrics": {
+    "mse": 0.025308018853558045,
+    "rmse": 0.15908494225902728,
+    "mae": 0.128953495370186,
+    "r2": 0.9981506138964769,
+    "adj_r2": 0.9981318701184007,
+    "n_samples": 300,
+    "evaluation_timestamp": 1769739968.982497
+  },
+  "training_epochs": 500,
+  "total_training_runs": 1
+}
