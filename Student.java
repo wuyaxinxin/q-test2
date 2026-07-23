@@ -10,6 +10,6 @@ public class Student {
     }
 
     public static void main(String[] args) {
-        System.out.println("中山先生");
+        System.out.println("蒋中正");
     }
 }
